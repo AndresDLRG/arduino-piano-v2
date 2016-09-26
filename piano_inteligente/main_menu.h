@@ -16,21 +16,16 @@ void showMainMenuScreen(){
     key = keypad.getKey();
     
     if (key == '2') { // up
-      Serial.println("up");
       if(selector > 0) { // not taking negative selection
           selector--;
           refreshScreen(MENU_MAIN, MENU_MAIN_SIZE, selector);
       }    
     } else if (key == '8') { // down
-       Serial.println("down");
       if(selector < MENU_MAIN_SIZE - 1) { // not taking over positive selection
           selector++;
           refreshScreen(MENU_MAIN, MENU_MAIN_SIZE, selector);
       } 
     } else if (key == '6') { // select
-       Serial.println("select");
-       Serial.print("Selector value: ");
-       Serial.println(selector);
       // Check the selected item
       switch(selector) {
         case 0: goToScreen(SCREEN_FREE_MODE, "");

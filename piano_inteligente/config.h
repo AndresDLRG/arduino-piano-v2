@@ -10,38 +10,42 @@
  ************************************************************************************/
  
 // Pins used for the piano keys
-#define PIN_DO            53
-#define PIN_DO_           52
-#define PIN_RE            51
-#define PIN_RE_           50
-#define PIN_MI            49
-#define PIN_FA            48
-#define PIN_FA_           47
-#define PIN_SOL           46
-#define PIN_SOL_          45
-#define PIN_LA            44
-#define PIN_LA_           43
-#define PIN_SI            42
+#define PIN_DO            47
+#define PIN_DO_           46
+#define PIN_RE            45
+#define PIN_RE_           44
+#define PIN_MI            43
+#define PIN_FA            42
+#define PIN_FA_           41
+#define PIN_SOL           40
+#define PIN_SOL_          39
+#define PIN_LA            38
+#define PIN_LA_           37
+#define PIN_SI            36
 
 // Pins for the LCD screen
-#define PIN_RS            1
-#define PIN_ENABLE        2
-#define PIN_DB4           3
-#define PIN_DB5           4
-#define PIN_DB6           5
-#define PIN_DB7           6
+#define PIN_RS            33
+#define PIN_ENABLE        32
+#define PIN_DB4           31
+#define PIN_DB5           30
+#define PIN_DB6           29
+#define PIN_DB7           28
 
 // Pins for the keypad
-#define PIN_KEYPAD_ROW_0  7
-#define PIN_KEYPAD_ROW_1  8
-#define PIN_KEYPAD_ROW_2  9
+#define PIN_KEYPAD_ROW_0  13
+#define PIN_KEYPAD_ROW_1  12
+#define PIN_KEYPAD_ROW_2  11
 #define PIN_KEYPAD_ROW_3  10
-#define PIN_KEYPAD_COL_0  11
-#define PIN_KEYPAD_COL_1  12
-#define PIN_KEYPAD_COL_2  13
+#define PIN_KEYPAD_COL_0  9
+#define PIN_KEYPAD_COL_1  8
+#define PIN_KEYPAD_COL_2  7
 
 // Pins for SD card reader
-// TODO
+// Should not be change or errors migth happen
+#define PIN_MISO          50
+#define PIN_MOSI          51
+#define PIN_SCK           52
+#define PIN_CS            53
 
 
 /************************************************************************************
@@ -130,10 +134,10 @@ byte upArrow[8] = {
  ************************************************************************************/
 // Main menu
 char *MENU_MAIN[] = {
-  "Modo libre",
-  "Modo escucha",
-  "Modo aprende",
-  "Instrumentos"
+  "MODO LIBRE",
+  "MMODO ESCUCHA",
+  "MODO APRENDE",
+  "INSTRUMENTOS"
 };
 byte MENU_MAIN_SIZE = 4;
 
@@ -143,6 +147,7 @@ byte MENU_MAIN_SIZE = 4;
  ************************************************************************************/
 
 #define MIDI_BAUDS  19200
+#define MIDI_VOLUME 100
 
 
 /************************************************************************************
@@ -174,6 +179,6 @@ const uint8_t PINS_PIANO_KEY_SIZE = 12;
 #define SCREEN_INSTRUMENT_SELECTION     6
 
 // LCD configuration
-#define LCD_ROWS    4             
-#define LCD_COLS    20
+#define LCD_ROWS    2             
+#define LCD_COLS    16
 
