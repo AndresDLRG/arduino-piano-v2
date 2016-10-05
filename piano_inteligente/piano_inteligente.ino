@@ -43,13 +43,19 @@ File root;
  */
 void setup() {
   Serial.begin(MIDI_BAUDS);
+  pinMode(PIN_CONTRAST, OUTPUT);
+  for (uint8_t i = 0; i < PINS_PIANO_KEY_SIZE ; i++) {
+    pinMode(PINS_INPUT[i], OUTPUT);
+  }
+  
+  analogWrite(PIN_CONTRAST, 130);
 
   //Initializing the SD card
   if (!SD.begin(PIN_CS)) {
-    Serial.println("initialization failed!");
+    //Serial.println("initialization failed!");
     return;
   }
-  Serial.println("initialization done!");
+  //Serial.println("initialization done!");
   
   // Register custom characters for the LCD
   lcd.begin(LCD_COLS, LCD_ROWS);
@@ -57,10 +63,9 @@ void setup() {
   lcd.createChar(1, leftArrow);
   lcd.createChar(2, downArrow);
   lcd.createChar(3, upArrow);
-  
+
   goToScreen(SCREEN_MAIN_MENU, "");
 
-  // getMelodyFromFile("ALEGRIA.TXT");
 }
 
 

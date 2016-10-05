@@ -44,30 +44,28 @@ void showLearnModeSelectionScreen(){
 }
 
 void showLearnModePlayingScreen(String melody) {
-
-  struct Melody myMelody = getMelodyFromFile(melody);
-
+  Melody myMelody = getMelodyFromFile(melody);
+  int responseCode;
+  
   lcd.clear();
-  lcd.setCursor(0,0);
+  lcd.setCursor(4,0);
+  lcd.print("APRENDIENDO:");
+  lcd.setCursor(1,1);
   lcd.print(melody);
   lcd.setCursor(1, 3);
   lcd.write((byte)1);
   lcd.print("PARA REGRESAR");
   
-  char key;
+  responseCode = learn(&myMelody);;
   
-  //
-  while(true) {
-    // Get if a key is pressed
-    key = keypad.getKey();
+  if (responseCode == 1) { // melody learned successfully
+    lcd.clear();
+    lcd.setCursor(4, 0);
+    lcd.print("FELICIDADES");
+    lcd.setCursor(3, 2);
+    lcd.print("LO HAS LOGRADO");
+    delay(5000);
+  } 
     
-    if (key == '4') { // up
-      return;
-    }
-  // Do other things not related to menu
-
-  // So the arduino wont over proccess
-  delay(50);
-  }
 }
 

@@ -110,23 +110,6 @@ byte getPinForNote(byte note) {
 }
 
 /**
- * Plays a melody till the lastNote passed, highligthing the keys of each note
- * 
- * @param melody the melody to play
- * @param lasNote the number of the last note to play
- */
-void simonSays(struct Melody melody, byte lastNote) {
-  for (uint8_t i = 0; i < lastNote; i++) {
-    midiNoteOn(melody.notes[i], MIDI_VOLUME);
-    digitalWrite(getPinForNote(melody.notes[i]), HIGH);
-    delay(melody.times[i]);
-    midiNoteOff(melody.notes[i], MIDI_VOLUME);
-    digitalWrite(getPinForNote(melody.notes[i]), LOW);
-    delay(melody.rests[i]);
-  }
-}
-
-/**
  * Creates a menu holding the names of files from the SD
  * 
  * @param fileCount the number of files that gonna be read
@@ -245,6 +228,7 @@ struct Melody getMelodyFromFile(String file) {
         previousLine = currentLine;
         switch(currentLine) {
           case 1: line.toCharArray(myMelody.name, 15);
+                  Serial.println(myMelody.name);
                   break;
           case 2: myMelody.size = line.toInt();
                   break;
@@ -263,34 +247,160 @@ struct Melody getMelodyFromFile(String file) {
     myMelody.rests[cont++] = line.toInt();
     // close the file:
     myFile.close();
+  } else {
+    Serial.println("File couldnt be opened");
   }
 
+  return myMelody;
+}
+
+/**
+ * Prints a melody to Serial
+ * 
+ * @param melody the melody to print
+ */
+void printMelody(struct Melody *melody){
   // print my melody for testing purpouses
-  /*Serial.println("Printing my melody after all");
+  Serial.println("Printing my melody after all");
   Serial.print("name: ");
-  Serial.println(myMelody.name);
+  Serial.println(melody->name);
   Serial.print("size: ");
-  Serial.println(myMelody.size);
+  Serial.println(melody->size);
   Serial.print("notes: ");
-  for (int i = 0; i < myMelody.size; i++) {
-    Serial.print(myMelody.notes[i]);
+  for (int i = 0; i < melody->size; i++) {
+    Serial.print(melody->notes[i]);
     Serial.print(",");
   }
   Serial.println("");
   Serial.print("times: ");
-  for (int i = 0; i < myMelody.size; i++) {
-    Serial.print(myMelody.times[i]);
+  for (int i = 0; i < melody->size; i++) {
+    Serial.print(melody->times[i]);
     Serial.print(",");
   }
   Serial.println("");
   Serial.print("rests: ");
-  for (int i = 0; i < myMelody.size; i++) {
-    Serial.print(myMelody.rests[i]);
+  for (int i = 0; i < melody->size; i++) {
+    Serial.print(melody->rests[i]);
     Serial.print(",");
   }
-  Serial.println("");*/
-
-  return myMelody;
+  Serial.println("");
 }
+
+/**
+ * Plays a melody till the lastNote passed, highligthing the keys of each note
+ * 
+ * @param melody the melody to play
+ * @param lasNote the number of the last note to play
+ */
+void simonSays(struct Melody *melody, byte lastNote) {
+  for (uint8_t i = 0; i < lastNote; i++) {
+    midiNoteOn(melody->notes[i], MIDI_VOLUME);
+    digitalWrite(getPinForNote(melody->notes[i]), HIGH);
+    delay(melody->times[i]);
+    midiNoteOff(melody->notes[i], MIDI_VOLUME);
+    digitalWrite(getPinForNote(melody->notes[i]), LOW);
+    delay(melody->rests[i]);
+  }
+}
+
+/**
+ * Apply learn mode a a melody passed
+ * 
+ * @param melody the melody to learn
+ * @return 1 if successfully completed the melody, other number if not
+ */
+int learn(struct Melody *melody) {
+  uint8_t currentOctave = 0;
+  uint8_t maxLevel = melody->size;
+  uint8_t currentMaxLevel = 1;
+  uint8_t currentLevel = 1;
+  uint8_t flag = 0;
+  char key;
+  uint16_t lastKeys = 0;
+  uint16_t currentKeys = 0;
+
+  // print the octave
+  lcd.setCursor(LCD_COLS-1,LCD_ROWS-1);
+  lcd.print(currentOctave);
+  
+  // simonSays till last actual
+  simonSays(melody, currentMaxLevel);
+  
+  while(currentMaxLevel <= maxLevel) {
+    key = keypad.getKey();
+    if (key == '*') { // reduce octave
+      if(currentOctave > 0) {
+        currentOctave--;
+      } else {
+        currentOctave = 9;
+      }
+      lcd.setCursor(LCD_COLS-1,LCD_ROWS-1);
+      lcd.print(currentOctave);
+    }else if (key == '#') { //aument octave
+      if(currentOctave < 9) {
+        currentOctave++;
+      } else {
+        currentOctave = 0;
+      }
+      lcd.setCursor(LCD_COLS-1,LCD_ROWS-1);
+      lcd.print(currentOctave);
+    }else if (key == '4') {
+      return -1;
+    } 
+
+    // Iterate over all my input pins, if the button is pressed the bit representing it become 1, else 0
+    for (uint8_t i = 0; i < PINS_PIANO_KEY_SIZE; i++) {
+      if (digitalRead(PINS_INPUT[i]) == HIGH) {
+        bitWrite(currentKeys, 15 - i, 1);
+      } else {
+        bitWrite(currentKeys, 15 - i, 0);
+      }
+    }
+
+    // Iterate over my currentKeys bits
+    for (uint8_t i = 0; i < PINS_PIANO_KEY_SIZE; i++) {
+      uint8_t myBit = bitRead(currentKeys, 15 - i);
+      // if the bit that is used for that pin suffered a state change
+      // lets say was 0 the last loop and become 1 or viceversa
+      // this ways is for preventing sending to much commands
+      if (bitRead(lastKeys, 15 - i) != myBit) {
+        // if the bit is 1 turn on the note
+        // if is 0 turn off the note
+        if(myBit == 1) {
+          midiNoteOn(PIN_NOTES[i] + (currentOctave * PINS_PIANO_KEY_SIZE), MIDI_VOLUME);
+        } else {
+          midiNoteOff(PIN_NOTES[i] + (currentOctave * PINS_PIANO_KEY_SIZE), MIDI_VOLUME);
+          
+          // detecting if the pressed button was correct
+          if(PINS_INPUT[i] == getPinForNote(melody->notes[currentLevel - 1])) {
+            currentLevel++;
+            if (currentLevel > currentMaxLevel){
+              if (currentMaxLevel > maxLevel) {
+                // the melody is over
+                break;
+              }
+              currentMaxLevel++;
+              currentLevel = 1;
+              delay(1000);
+              simonSays(melody, currentMaxLevel);
+              break;
+            }
+          } else {
+            // if is was a wrong key
+            currentLevel = 1;
+            delay(500);
+            simonSays(melody, currentMaxLevel);
+            break;
+          }
+        }
+      }
+    }
+    // Actualizo mis variables
+    lastKeys = currentKeys;
+    
+    delay(50);
+  }
+  return 1;
+}  
 
 

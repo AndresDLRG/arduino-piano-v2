@@ -30,6 +30,7 @@
 #define PIN_DB5           30
 #define PIN_DB6           29
 #define PIN_DB7           28
+#define PIN_CONTRAST      2
 
 // Pins for the keypad
 #define PIN_KEYPAD_ROW_0  13
@@ -135,7 +136,7 @@ byte upArrow[8] = {
 // Main menu
 char *MENU_MAIN[] = {
   "MODO LIBRE",
-  "MMODO ESCUCHA",
+  "MODO ESCUCHA",
   "MODO APRENDE",
   "INSTRUMENTOS"
 };
@@ -179,6 +180,6 @@ const uint8_t PINS_PIANO_KEY_SIZE = 12;
 #define SCREEN_INSTRUMENT_SELECTION     6
 
 // LCD configuration
-#define LCD_ROWS    2             
-#define LCD_COLS    16
+#define LCD_ROWS    4             
+#define LCD_COLS    20
 
